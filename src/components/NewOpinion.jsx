@@ -1,10 +1,14 @@
-import { useActionState } from 'react'
+import { useActionState, use } from 'react'
+import { OpinionsContext } from '../store/opinions-context'
+import Submit from './Submit.jsx'
 
 export function NewOpinion() {
-  function opinionAction(prevState, formData) {
-    const name = formData.get('userName')
+  const { addOpinion } = use(OpinionsContext)
+
+  async function opinionAction(prevState, formData) {
     const title = formData.get('title')
-    const opinion = formData.get('body')
+    const body = formData.get('body')
+    const userName = formData.get('userName')
 
     let errors = []
 
@@ -13,11 +17,11 @@ export function NewOpinion() {
     }
 
 
-    if (opinion.trim().length < 10 || opinion.trim().length > 300) {
+    if (body.trim().length < 10 || body.trim().length > 300) {
       errors.push('Opinion must be between 10 and 300 characters long.')
     }
 
-    if (!name.trim()) {
+    if (!userName.trim()) {
       errors.push('Please provide your name.')
     }
 
@@ -25,12 +29,14 @@ export function NewOpinion() {
       return {
         errors,
         enteredValues: {
-          name,
           title,
-          opinion
+          body,
+          userName
         }
       }
     }
+
+    await addOpinion({ title, body, userName })
 
     return { errors: null }
   }
@@ -48,7 +54,7 @@ export function NewOpinion() {
               type="text"
               id="userName"
               name="userName"
-              defaultValue={formState.enteredValues?.name}
+              defaultValue={formState.enteredValues?.userName}
             />
           </p>
 
@@ -79,9 +85,7 @@ export function NewOpinion() {
           ))}
         </ul>}
 
-        <p className="actions">
-          <button type="submit">Submit</button>
-        </p>
+        <Submit />
       </form>
     </div>
   );
